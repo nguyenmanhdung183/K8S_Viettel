@@ -1,96 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Messages</title>
+    <title>Nhắn Tin</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
-        h2 {
-            text-align: center;
-            color: #333;
-        }
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 15px;
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #28a745;
+        header {
+            background-color: #4CAF50;
             color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
+            padding: 10px;
+            text-align: center;
         }
-        button:hover {
-            background-color: #218838;
+        #messages {
+            flex: 1;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ccc;
+            overflow-y: auto;
+            margin: 10px;
+            border-radius: 5px;
         }
         .message {
             margin: 5px 0;
-            padding: 10px;
-            background: #e9ecef;
-            border-radius: 5px;
         }
-        .logout-button, .home-button {
-            margin-top: 20px;
+        #messageForm {
+            display: flex;
+            margin: 10px;
+        }
+        #messageInput {
+            flex: 1;
             padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 3px;
+            border-radius: 5px;
             cursor: pointer;
-            display: block;
-            text-align: center;
+            margin-right: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        a {
             text-decoration: none;
+            color: #4CAF50;
         }
-        .logout-button {
-            background-color: #a72828;
+        a:hover {
+            text-decoration: underline;
         }
-        .logout-button:hover {
-            background-color: #c82333;
-        }
-        .home-button {
-            background-color: #007bff;
-        }
-        .home-button:hover {
-            background-color: #0056b3;
+        .current-user {
+            margin: 10px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h2>Messages</h2>
-    <div class="container">
-        <p><strong>Tài khoản của bạn: {{ current_user.username }}</strong></p>
-        <p><strong>Tài khoản người nhận: {{ receiver.username }}</strong></p>
-        <form method="POST">
-            <input type="text" name="content" placeholder="Nội dung tin nhắn" required>
-            <button type="submit">Gửi tin nhắn</button>
-        </form>
-        <div>
-            {% for message in messages %}
-            <div class="message">
-                <strong>{{ message.sender.username if message.sender else "Unknown" }}:</strong> {{ message.content }}
-            </div>
-            {% endfor %}
-        </div>
-        <a class="home-button" href="{{ url_for('home') }}">Quay lại trang chính</a>
-        <a class="logout-button" href="{{ url_for('logout') }}">Đăng xuất</a>
+    <header>
+        <h2>Nhắn Tin với {{ receiver.username }}</h2>
+    </header>
+    <div class="current-user">Người dùng hiện tại: <strong>{{ current_user.username }}</strong></div>
+    <div id="messages">
+        {% for message in messages %}
+            <div class="message"><strong>{{ message.sender.username }}:</strong> {{ message.content }}</div>
+        {% endfor %}
     </div>
+    <form id="messageForm" method="POST" onsubmit="sendMessage(event)">
+        <input type="text" id="messageInput" placeholder="Nội dung tin nhắn" required>
+        <button type="submit">Gửi</button>
+    </form>
+    <div style="margin: 10px;">
+        <a href="{{ url_for('home') }}"><button>Quay về trang chính</button></a>
+        <a href="{{ url_for('logout') }}"><button>Đăng xuất</button></a>
+    </div>
+
+    <script>
+        var socket = io();
+
+        // Tham gia phòng chat
+        socket.emit('join', { username: '{{ current_user.username }}' });
+
+        // Lắng nghe sự kiện nhận tin nhắn
+        socket.on('receive_message', function(data) {
+            var messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += '<div class="message"><strong>' + data.sender + ':</strong> ' + data.content + '</div>';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;  // Cuộn xuống cuối
+        });
+
+        function sendMessage(event) {
+            event.preventDefault();
+            var input = document.getElementById('messageInput');
+            var content = input.value;
+
+            // Thêm tin nhắn vào danh sách ngay lập tức
+            var messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += '<div class="message"><strong>' + '{{ current_user.username }}' + ':</strong> ' + content + '</div>';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;  // Cuộn xuống cuối
+
+            // Gửi tin nhắn qua Socket.IO
+            socket.emit('send_message', {
+                content: content,
+                receiver: '{{ receiver.username }}'
+            });
+            input.value = '';  // Xóa nội dung ô input
+        }
+    </script>
 </body>
 </html>
