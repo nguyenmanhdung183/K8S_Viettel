@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+        }
+        .logout-button, .home-button {
+            margin-top: 20px;
+            padding: 10px;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            display: block;
+            text-align: center;
+            text-decoration: none;
+        }
+        .logout-button {
+            background-color: #a72828;
+        }
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+        .home-button {
+            background-color: #007bff;
+        }
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h2>Messages</h2>
+    <div class="container">
+        <p><strong>Tài khoản của bạn: {{ current_user.username }}</strong></p>
+        <p><strong>Tài khoản người nhận: {{ receiver.username }}</strong></p>
+        <form method="POST">
+            <input type="text" name="content" placeholder="Nội dung tin nhắn" required>
+            <button type="submit">Gửi tin nhắn</button>
+        </form>
+        <div>
+            {% for message in messages %}
+            <div class="message">
+                <strong>{{ message.sender.username if message.sender else "Unknown" }}:</strong> {{ message.content }}
+            </div>
+            {% endfor %}
+        </div>
+        <a class="home-button" href="{{ url_for('home') }}">Quay lại trang chính</a>
+        <a class="logout-button" href="{{ url_for('logout') }}">Đăng xuất</a>
+    </div>
+</body>
+</html>

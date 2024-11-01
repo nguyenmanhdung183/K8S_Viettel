@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        .container {
+            margin: 50px auto;
+            padding: 20px;
+            max-width: 400px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .logout-button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #a72828;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Nhắn Tin</h2>
+        <form method="POST">
+            <input type="text" name="username" placeholder="Tên tài khoản người nhận" required>
+            <button type="submit">Gửi</button>
+        </form>
+        <p>Xin chào, {{ current_user.username }}</p>
+        <a class="logout-button" href="{{ url_for('logout') }}">Đăng xuất</a>
+    </div>
+</body>
+</html>
