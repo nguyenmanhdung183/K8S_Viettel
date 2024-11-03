@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-web
+  labels:
+    app: app-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-web
+  template:
+    metadata:
+      labels:
+        app: app-web
+    spec:
+      containers:
+        - name: app-web-container
+          image: manhdungnguyen/flask-app:v1.0.0  # Sử dụng phiên bản cụ thể
+          ports:
+            - containerPort: 5000
+          env:
+            - name: FLASK_ENV
+              value: "production"
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret  # Tham chiếu đến một Kubernetes Secret
+                  key: secret-key  # Khóa trong secret
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "500m"
+            limits:
+              memory: "512Mi"
+              cpu: "1"
+          readinessProbe:
+            httpGet:
+              path: /health  # Điều chỉnh đường dẫn nếu cần
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health  # Điều chỉnh đường dẫn nếu cần
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service
+spec:
+  selector:
+    app: app-web
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP
